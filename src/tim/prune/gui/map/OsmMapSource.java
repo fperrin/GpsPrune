@@ -152,12 +152,31 @@ public class OsmMapSource extends MapSource
 
 	/**
 	 * Make the URL to get the specified tile
+	 * @param inLayerNum layer number
+	 * @param inZoom zoom level
+	 * @param inX x coordinate
+	 * @param inY y coordinate
+	 * @return relative file path as String
 	 */
 	public String makeURL(int inLayerNum, int inZoom, int inX, int inY)
 	{
 		// Check if the base url has a [1234], if so replace at random
-		StringBuffer url = new StringBuffer();
-		url.append(pickServerUrl(_baseUrls[inLayerNum]));
+		String baseUrl = pickServerUrl(_baseUrls[inLayerNum]);
+		return makeUrl(baseUrl, inLayerNum, inZoom, inX, inY);
+	}
+
+	public String makeUrl(String baseUrl, int inLayerNum, int inZoom, int inX, int inY)
+	{
+		// If the base URL has {x}/{y} placeholders, use them
+		if (baseUrl.contains("{x}")) {
+			baseUrl = baseUrl.replace("{z}", Integer.toString(inZoom))
+				.replace("{x}", Integer.toString(inX))
+				.replace("{y}", Integer.toString(inY));
+			return baseUrl;
+		}
+
+		// Else simply append the tile indices and file extension
+		StringBuffer url = new StringBuffer(baseUrl);
 		url.append(inZoom).append('/').append(inX).append('/').append(inY);
 		url.append('.').append(getFileExtension(inLayerNum));
 		if (_apiKey != null)
@@ -165,6 +184,26 @@ public class OsmMapSource extends MapSource
 			url.append("?apikey=").append(_apiKey);
 		}
 		return url.toString();
+	}
+
+	/**
+	 * Make a relative file path from the base directory including site name
+	 * @param inLayerNum layer number
+	 * @param inZoom zoom level
+	 * @param inX x coordinate
+	 * @param inY y coordinate
+	 * @return relative file path as String
+	 */
+	public String makeFilePath(int inLayerNum, int inZoom, int inX, int inY)
+	{
+		String siteName = getSiteName(inLayerNum);
+		String filePath = makeUrl(siteName, inLayerNum, inZoom, inX, inY);
+		int indexParam = filePath.indexOf("?");
+		if (indexParam > 0)
+		{
+			filePath = filePath.substring(0, indexParam);
+		}
+		return filePath;
 	}
 
 	/**
