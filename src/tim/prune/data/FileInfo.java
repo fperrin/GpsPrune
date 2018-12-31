@@ -75,6 +75,19 @@ public class FileInfo
 	}
 
 	/**
+	 * @return The source names
+	 */
+	public ArrayList<String> getFilenames()
+	{
+		ArrayList<String> filenames = new ArrayList<String>();
+		for (SourceInfo source : _sources)
+		{
+			filenames.add(source.getName());
+		}
+		return filenames;
+	}
+
+	/**
 	 * @param inIndex index number, starting from zero
 	 * @return source info object
 	 */
