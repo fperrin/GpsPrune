@@ -77,6 +77,7 @@ public class MenuManager implements DataSubscriber
 	private JMenuItem _reverseItem = null;
 	private JMenuItem _addTimeOffsetItem = null;
 	private JMenuItem _addAltitudeOffsetItem = null;
+	private JMenuItem _removeAltitudesItem = null;
 	private JMenuItem _mergeSegmentsItem = null;
 	private JMenuItem _rearrangeWaypointsItem = null;
 	private JMenuItem _splitSegmentsItem = null;
@@ -425,6 +426,8 @@ public class MenuManager implements DataSubscriber
 		rangeMenu.add(_addTimeOffsetItem);
 		_addAltitudeOffsetItem = makeMenuItem(FunctionLibrary.FUNCTION_ADD_ALTITUDE_OFFSET, false);
 		rangeMenu.add(_addAltitudeOffsetItem);
+		_removeAltitudesItem = makeMenuItem(FunctionLibrary.FUNCTION_REMOVE_ALTITUDES, false);
+		rangeMenu.add(_removeAltitudesItem);
 		_mergeSegmentsItem = new JMenuItem(I18nManager.getText("menu.range.mergetracksegments"));
 		_mergeSegmentsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -956,6 +959,7 @@ public class MenuManager implements DataSubscriber
 		_reverseItem.setEnabled(hasRange);
 		_addTimeOffsetItem.setEnabled(hasRange);
 		_addAltitudeOffsetItem.setEnabled(hasRange);
+		_removeAltitudesItem.setEnabled(hasRange);
 		_convertNamesToTimesItem.setEnabled(hasRange && _track.hasWaypoints());
 		_deleteFieldValuesItem.setEnabled(hasRange);
 		_fullRangeDetailsItem.setEnabled(hasRange);

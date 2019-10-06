@@ -28,6 +28,7 @@ import tim.prune.function.PhotoPopupFunction;
 import tim.prune.function.PlayAudioFunction;
 import tim.prune.function.RearrangePhotosFunction;
 import tim.prune.function.RearrangeWaypointsFunction;
+import tim.prune.function.RemoveAltitudes;
 import tim.prune.function.RemoveAudioFunction;
 import tim.prune.function.RemovePhotoFunction;
 import tim.prune.function.RotatePhoto;
@@ -110,6 +111,7 @@ public abstract class FunctionLibrary
 	public static GenericFunction FUNCTION_DOWNLOAD_OSM = null;
 	public static GenericFunction FUNCTION_ADD_TIME_OFFSET  = null;
 	public static GenericFunction FUNCTION_ADD_ALTITUDE_OFFSET  = null;
+	public static GenericFunction FUNCTION_REMOVE_ALTITUDES = null;
 	public static GenericFunction FUNCTION_CONVERT_NAMES_TO_TIMES  = null;
 	public static GenericFunction FUNCTION_DELETE_FIELD_VALUES  = null;
 	public static GenericFunction FUNCTION_PASTE_COORDINATES = null;
@@ -190,6 +192,7 @@ public abstract class FunctionLibrary
 		FUNCTION_DOWNLOAD_OSM = new DownloadOsmFunction(inApp);
 		FUNCTION_ADD_TIME_OFFSET = new AddTimeOffset(inApp);
 		FUNCTION_ADD_ALTITUDE_OFFSET = new AddAltitudeOffset(inApp);
+		FUNCTION_REMOVE_ALTITUDES = new RemoveAltitudes(inApp);
 		FUNCTION_CONVERT_NAMES_TO_TIMES = new ConvertNamesToTimes(inApp);
 		FUNCTION_DELETE_FIELD_VALUES = new DeleteFieldValues(inApp);
 		FUNCTION_PASTE_COORDINATES = new PasteCoordinates(inApp);
