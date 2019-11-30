@@ -7,7 +7,7 @@ export DH_VERBOSE=1
 export JAVA_HOME=/usr/lib/jvm/default-java
 export CLASSPATH=/usr/share/java/j3dcore.jar:/usr/share/java/j3dutils.jar:/usr/share/java/vecmath.jar
 
-export JH_JAR_EXTRA=$(shell find src/tim/prune/lang/ src/tim/prune/gui/images -type f) src/tim/prune/function/srtm/srtmtiles.dat
+# export JH_JAR_EXTRA=$(shell find src/tim/prune/lang/ src/tim/prune/gui/images -type f) src/tim/prune/function/srtm/srtmtiles.dat
 
 #srtmtiles:
 #	javac tim/prune/function/srtm/gen/GenerateTileLookup.java
@@ -15,8 +15,10 @@ export JH_JAR_EXTRA=$(shell find src/tim/prune/lang/ src/tim/prune/gui/images -t
 #	mv $(CURDIR)/srtmtiles.dat tim/prune/function/srtm/
 #	rm -rf tim/prune/function/srtm/gen/GenerateTileLookup.class
 
-override_jh_build: #srtmtiles
+override_jh_build:
 	jh_build --no-javadoc
+	# JH_JAR_EXTRA is broken
+	cd src; jar uf ../gpsprune.jar tim/prune/*.txt tim/prune/lang/* tim/prune/gui/images  tim/prune/function/srtm/srtmtiles.dat
 
 override_jh_depends:
 	jh_depends -v -Xlibjava3d-java -Xlibvecmath-java -Xlibjava3d-jni
