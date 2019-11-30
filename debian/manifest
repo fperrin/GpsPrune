@@ -1,0 +1,4 @@
+usr/share/gpsprune/gpsprune.jar:
+ Main-Class: tim.prune.GpsPrune
+ Debian-Java-Home: /usr/lib/jvm/default-java
+ Class-Path: /usr/share/java/j3dcore.jar /usr/share/java/j3dutils.jar /usr/share/java/vecmath.jar /usr/share/gpsprune/gpsprune.jar

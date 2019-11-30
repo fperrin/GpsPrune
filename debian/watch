@@ -1,0 +1,4 @@
+version=3
+opts=downloadurlmangle=s/_source/_source_debian/ \
+https://activityworkshop.net/software/gpsprune/download.html \
+gpsprune_(\d+.*)_source\.(?:tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))

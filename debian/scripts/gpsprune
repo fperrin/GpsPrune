@@ -1,0 +1,16 @@
+#!/bin/sh
+PRUNEJAR=/usr/share/gpsprune/gpsprune.jar
+JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+
+proxyhost=$(echo $http_proxy | sed -n 's?http[s|]://\([^:/]\+\).*?\1?p')
+proxyport=$(echo $http_proxy | sed -n 's?http[s|]://[^:]\+:\([0-9]\+\).*?\1?p')
+
+if [ -z $proxyport ] ; then
+    if [ -z $proxyhost ] ; then
+        java $JAVA_OPTS -jar $PRUNEJAR "$@"
+    else
+        java $JAVA_OPTS -Dhttp.proxyHost=$proxyhost -jar $PRUNEJAR "$@"
+    fi
+else
+    java $JAVA_OPTS -Dhttp.proxyHost=$proxyhost -Dhttp.proxyPort=$proxyport -jar $PRUNEJAR "$@"
+fi

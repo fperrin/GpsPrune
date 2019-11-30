@@ -1,0 +1,3 @@
+gpsprune.jar            /usr/share/gpsprune/
+debian/gpsprune.desktop /usr/share/applications/
+debian/scripts/gpsprune /usr/bin/
