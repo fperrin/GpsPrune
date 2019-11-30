@@ -1,6 +1,6 @@
 #!/bin/sh
 PRUNEJAR=/usr/share/gpsprune/gpsprune.jar
-JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel -Djdk.gtk.version=3"
 
 proxyhost=$(echo $http_proxy | sed -n 's?http[s|]://\([^:/]\+\).*?\1?p')
 proxyport=$(echo $http_proxy | sed -n 's?http[s|]://[^:]\+:\([0-9]\+\).*?\1?p')
