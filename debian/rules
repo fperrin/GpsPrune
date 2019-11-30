@@ -1,0 +1,39 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export JAVA_HOME=/usr/lib/jvm/default-java
+export CLASSPATH=/usr/share/java/j3dcore.jar:/usr/share/java/j3dutils.jar:/usr/share/java/vecmath.jar
+
+export JH_JAR_EXTRA=$(shell find tim/prune/lang/ tim/prune/gui/images -type f) tim/prune/function/srtm/srtmtiles.dat
+
+srtmtiles:
+	javac tim/prune/function/srtm/gen/GenerateTileLookup.java
+	CLASSPATH=. java tim.prune.function.srtm.gen.GenerateTileLookup
+	mv $(CURDIR)/srtmtiles.dat tim/prune/function/srtm/
+	rm -rf tim/prune/function/srtm/gen/GenerateTileLookup.class
+
+override_jh_build: srtmtiles
+	jh_build --no-javadoc
+
+override_jh_depends:
+	jh_depends -v -Xlibjava3d-java -Xlibvecmath-java -Xlibjava3d-jni
+
+override_dh_auto_build:
+	dh_auto_build -- build
+
+%:
+	dh $@ \
+		--with javahelper \
+		--parallel
+
+override_dh_auto_install:
+	dh_auto_install
+
+	# Install application icon
+	for size in 16 22 24 32 36 48 64 72 96 128; do \
+		install -o root -g root -d $(CURDIR)/debian/gpsprune/usr/share/icons/hicolor/$${size}x$${size}/apps ; \
+		install -o root -g root -m 644 $(CURDIR)/tim/prune/gui/images/window_icon_$${size}.png $(CURDIR)/debian/gpsprune/usr/share/icons/hicolor/$${size}x$${size}/apps/gpsprune.png ; \
+	done
