@@ -1,12 +1,6 @@
 package tim.prune.function.srtm;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
@@ -15,14 +9,12 @@ import tim.prune.DataSubscriber;
 import tim.prune.GenericFunction;
 import tim.prune.I18nManager;
 import tim.prune.UpdateMessageBroker;
-import tim.prune.config.Config;
 import tim.prune.data.Altitude;
 import tim.prune.data.DataPoint;
 import tim.prune.data.Field;
 import tim.prune.data.Track;
 import tim.prune.data.UnitSetLibrary;
 import tim.prune.gui.ProgressDialog;
-import tim.prune.tips.TipManager;
 import tim.prune.undo.UndoLookupSrtm;
 
 /**
@@ -38,13 +30,9 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 	private Track _track = null;
 	/** Flag for whether this is a real track or a terrain one */
 	private boolean _normalTrack = true;
-	/** Flag set when any tiles had to be downloaded (rather than just loaded locally) */
-	private boolean _hadToDownload = false;
 	/** Flag to check whether this function is currently running or not */
 	private boolean _running = false;
 
-	/** Expected size of hgt file in bytes */
-	private static final long HGT_SIZE = 2884802L;
 	/** Altitude below which is considered void */
 	private static final int VOID_VAL = -32768;
 
@@ -84,7 +72,10 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 	private void begin(Track inTrack, boolean inNormalTrack)
 	{
 		_running = true;
-		_hadToDownload = false;
+		if (! SrtmDiskCache.ensureCacheIsUsable())
+		{
+			_app.showErrorMessage(getNameKey(), "error.cache.notthere");
+		}
 		if (_progress == null) {
 			_progress = new ProgressDialog(_parentFrame, getNameKey());
 		}
@@ -131,8 +122,7 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 		for (int i = 0; i < _track.getNumPoints(); i++)
 		{
 			// Consider points which don't have altitudes or have zero values
-			if (!_track.getPoint(i).hasAltitude()
-				|| (overwriteZeros && _track.getPoint(i).getAltitude().getValue() == 0))
+			if (needsAltitude(_track.getPoint(i), overwriteZeros))
 			{
 				SrtmTile tile = new SrtmTile(_track.getPoint(i));
 				boolean alreadyGot = false;
@@ -148,12 +138,23 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 		lookupValues(tileList, overwriteZeros);
 		// Finished
 		_running = false;
-		// Show tip if lots of online lookups were necessary
-		if (_hadToDownload) {
-			_app.showTip(TipManager.Tip_DownloadSrtm);
-		}
 	}
 
+	/**
+	 * true if we need to set the altitude of this point
+	 */
+	private boolean needsAltitude(DataPoint point, boolean overwriteZeros)
+	{
+		if (!point.hasAltitude())
+		{
+			return true;
+		}
+		if (overwriteZeros && point.getAltitude().getValue() == 0)
+		{
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Lookup the values from SRTM data
@@ -170,93 +171,78 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 			_progress.setMaximum(inTileList.size());
 			_progress.setValue(0);
 		}
-		String errorMessage = null;
-		// Get urls for each tile
-		URL[] urls = TileFinder.getUrls(inTileList);
+		String errorMessage = "";
 		for (int t=0; t<inTileList.size() && !_progress.isCancelled(); t++)
 		{
-			if (urls[t] != null)
-			{
-				SrtmTile tile = inTileList.get(t);
-				try
-				{
-					// Set progress
-					_progress.setValue(t);
-					final int ARRLENGTH = 1201 * 1201;
-					int[] heights = new int[ARRLENGTH];
-					// Open zipinputstream on url and check size
-					ZipInputStream inStream = getStreamToHgtFile(urls[t]);
-					boolean entryOk = false;
-					if (inStream != null)
-					{
-						ZipEntry entry = inStream.getNextEntry();
-						entryOk = (entry != null && entry.getSize() == HGT_SIZE);
-						if (entryOk)
-						{
-							// Read entire file contents into one byte array
-							for (int i = 0; i < ARRLENGTH; i++)
-							{
-								heights[i] = inStream.read() * 256 + inStream.read();
-								if (heights[i] >= 32768) {heights[i] -= 65536;}
-							}
-						}
-						// else {
-						//	System.out.println("length not ok: " + entry.getSize());
-						// }
-						// Close stream from url
-						inStream.close();
-					}
+			SrtmTile tile = inTileList.get(t);
+			SrtmSource srtmSource = tile.findBestCachedSource();
 
-					if (entryOk)
+			if (srtmSource == null)
+			{
+				errorMessage += "Tile "+tile.getTileName()+" not in cache!\n";
+				continue;
+			}
+
+			// Set progress
+			_progress.setValue(t);
+
+			int[] heights;
+			try {
+				heights = srtmSource.getTileHeights(tile);
+			}
+			catch (SrtmSourceException e)
+			{
+				errorMessage += e.getMessage();
+				continue;
+			}
+			int rowSize = srtmSource.getRowSize(tile);
+			if (rowSize <= 0)
+			{
+				errorMessage += "Tile "+tile.getTileName()+" is corrupted";
+			}
+
+			// Loop over all points in track, try to apply altitude from array
+			for (int p = 0; p < _track.getNumPoints(); p++)
+			{
+				DataPoint point = _track.getPoint(p);
+				if (needsAltitude(point, inOverwriteZeros))
+				{
+					if (new SrtmTile(point).equals(tile))
 					{
-						// Loop over all points in track, try to apply altitude from array
-						for (int p = 0; p < _track.getNumPoints(); p++)
+						double x = (point.getLongitude().getDouble() - tile.getLongitude()) * (rowSize - 1);
+						double y = rowSize - (point.getLatitude().getDouble() - tile.getLatitude()) * (rowSize - 1);
+						int idx1 = ((int)y)*rowSize + (int)x;
+						try
 						{
-							DataPoint point = _track.getPoint(p);
-							if (!point.hasAltitude()
-								|| (inOverwriteZeros && point.getAltitude().getValue() == 0))
+							int[] fouralts = {heights[idx1], heights[idx1+1], heights[idx1-rowSize], heights[idx1-rowSize+1]};
+							int numVoids = (fouralts[0]==VOID_VAL?1:0) + (fouralts[1]==VOID_VAL?1:0)
+								+ (fouralts[2]==VOID_VAL?1:0) + (fouralts[3]==VOID_VAL?1:0);
+							// if (numVoids > 0) System.out.println(numVoids + " voids found");
+							double altitude = 0.0;
+							switch (numVoids)
 							{
-								if (new SrtmTile(point).equals(tile))
-								{
-									double x = (point.getLongitude().getDouble() - tile.getLongitude()) * 1200;
-									double y = 1201 - (point.getLatitude().getDouble() - tile.getLatitude()) * 1200;
-									int idx1 = ((int)y)*1201 + (int)x;
-									try
-									{
-										int[] fouralts = {heights[idx1], heights[idx1+1], heights[idx1-1201], heights[idx1-1200]};
-										int numVoids = (fouralts[0]==VOID_VAL?1:0) + (fouralts[1]==VOID_VAL?1:0)
-											+ (fouralts[2]==VOID_VAL?1:0) + (fouralts[3]==VOID_VAL?1:0);
-										// if (numVoids > 0) System.out.println(numVoids + " voids found");
-										double altitude = 0.0;
-										switch (numVoids)
-										{
-											case 0:	altitude = bilinearInterpolate(fouralts, x, y); break;
-											case 1: altitude = bilinearInterpolate(fixVoid(fouralts), x, y); break;
-											case 2:
-											case 3: altitude = averageNonVoid(fouralts); break;
-											default: altitude = VOID_VAL;
-										}
-										// Special case for terrain tracks, don't interpolate voids yet
-										if (!_normalTrack && numVoids > 0) {
-											altitude = VOID_VAL;
-										}
-										if (altitude != VOID_VAL)
-										{
-											point.setFieldValue(Field.ALTITUDE, ""+altitude, false);
-											// depending on settings, this value may have been added as feet, we need to force metres
-											point.getAltitude().reset(new Altitude((int)altitude, UnitSetLibrary.UNITS_METRES));
-											numAltitudesFound++;
-										}
-									}
-									catch (ArrayIndexOutOfBoundsException obe) {
-										// System.err.println("lat=" + point.getLatitude().getDouble() + ", x=" + x + ", y=" + y + ", idx=" + idx1);
-									}
-								}
+							case 0:	altitude = bilinearInterpolate(fouralts, x, y); break;
+							case 1: altitude = bilinearInterpolate(fixVoid(fouralts), x, y); break;
+							case 2:
+							case 3: altitude = averageNonVoid(fouralts); break;
+							default: altitude = VOID_VAL;
+							}
+							// Special case for terrain tracks, don't interpolate voids yet
+							if (!_normalTrack && numVoids > 0) {
+								altitude = VOID_VAL;
+							}
+							if (altitude != VOID_VAL)
+							{
+								point.setFieldValue(Field.ALTITUDE, ""+altitude, false);
+								// depending on settings, this value may have been added as feet, we need to force metres
+								point.getAltitude().reset(new Altitude((int)altitude, UnitSetLibrary.UNITS_METRES));
+								numAltitudesFound++;
 							}
 						}
+						catch (ArrayIndexOutOfBoundsException obe) {
+							errorMessage += "Point not in tile? lat=" + point.getLatitude().getDouble() + ", x=" + x + ", y=" + y + ", idx=" + idx1+"\n";
+						}
 					}
-				}
-				catch (IOException ioe) {errorMessage = ioe.getClass().getName() + " - " + ioe.getMessage();
 				}
 			}
 		}
@@ -266,6 +252,10 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 			return;
 		}
 
+		if (! errorMessage.equals("")) {
+			_app.showErrorMessageNoLookup(getNameKey(), errorMessage);
+			return;
+		}
 		if (numAltitudesFound > 0)
 		{
 			// Inform app including undo information
@@ -278,45 +268,12 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 					I18nManager.getTextWithNumber("confirm.lookupsrtm", numAltitudesFound));
 			}
 		}
-		else if (errorMessage != null) {
-			_app.showErrorMessageNoLookup(getNameKey(), errorMessage);
-		}
 		else if (inTileList.size() > 0) {
 			_app.showErrorMessage(getNameKey(), "error.lookupsrtm.nonefound");
 		}
 		else {
 			_app.showErrorMessage(getNameKey(), "error.lookupsrtm.nonerequired");
 		}
-	}
-
-	/**
-	 * See whether the SRTM file is already available locally first, then try online
-	 * @param inUrl URL for online resource
-	 * @return ZipInputStream either on the local file or on the downloaded zip file
-	 */
-	private ZipInputStream getStreamToHgtFile(URL inUrl)
-	throws IOException
-	{
-		String diskCachePath = Config.getConfigString(Config.KEY_DISK_CACHE);
-		if (diskCachePath != null)
-		{
-			File srtmDir = new File(diskCachePath, "srtm");
-			if (srtmDir.exists() && srtmDir.isDirectory() && srtmDir.canRead())
-			{
-				File srtmFile = new File(srtmDir, new File(inUrl.getFile()).getName());
-				if (srtmFile.exists() && srtmFile.isFile() && srtmFile.canRead()
-					&& srtmFile.length() > 400)
-				{
-					// System.out.println("Lookup: Using file " + srtmFile.getAbsolutePath());
-					// File found, use this one
-					return new ZipInputStream(new FileInputStream(srtmFile));
-				}
-			}
-		}
-		// System.out.println("Lookup: Trying online: " + inUrl.toString());
-		_hadToDownload = true;
-		// MAYBE: Only download if we're in online mode?
-		return new ZipInputStream(inUrl.openStream());
 	}
 
 	/**

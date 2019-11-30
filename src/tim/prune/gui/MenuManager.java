@@ -34,6 +34,9 @@ import tim.prune.function.SearchOpenCachingDeFunction;
 import tim.prune.function.browser.UrlGenerator;
 import tim.prune.function.browser.WebMapFunction;
 import tim.prune.function.search.SearchMapillaryFunction;
+import tim.prune.function.srtm.DownloadSrtmFunction;
+import tim.prune.function.srtm.SrtmGl1Source;
+import tim.prune.function.srtm.Srtm3Source;
 
 /**
  * Class to manage the menu bar and tool bar,
@@ -94,7 +97,7 @@ public class MenuManager implements DataSubscriber
 	private JMenuItem _getGpsiesItem = null;
 	private JMenuItem _uploadGpsiesItem = null;
 	private JMenuItem _lookupSrtmItem = null;
-	private JMenuItem _downloadSrtmItem = null;
+	private JMenu     _downloadSrtmMenu = null;
 	private JMenuItem _nearbyWikipediaItem = null;
 	private JMenuItem _nearbyOsmPoiItem = null;
 	private JMenuItem _showPeakfinderItem = null;
@@ -258,8 +261,15 @@ public class MenuManager implements DataSubscriber
 		// SRTM
 		_lookupSrtmItem = makeMenuItem(FunctionLibrary.FUNCTION_LOOKUP_SRTM, false);
 		onlineMenu.add(_lookupSrtmItem);
-		_downloadSrtmItem = makeMenuItem(FunctionLibrary.FUNCTION_DOWNLOAD_SRTM, false);
-		onlineMenu.add(_downloadSrtmItem);
+		// Download SRTM sub-menu
+		_downloadSrtmMenu = new JMenu(I18nManager.getText("function.downloadsrtm"));
+		_downloadSrtmMenu.setEnabled(false);
+		JMenuItem downloadStrmGl1Item = makeMenuItem(new DownloadSrtmFunction(_app, new SrtmGl1Source()));
+		_downloadSrtmMenu.add(downloadStrmGl1Item);
+		JMenuItem downloadStrm3Item = makeMenuItem(new DownloadSrtmFunction(_app, new Srtm3Source()));
+		_downloadSrtmMenu.add(downloadStrm3Item);
+		onlineMenu.add(_downloadSrtmMenu);
+
 		// Get gpsies tracks
 		_getGpsiesItem = makeMenuItem(FunctionLibrary.FUNCTION_GET_GPSIES, false);
 		onlineMenu.add(_getGpsiesItem);
@@ -654,6 +664,8 @@ public class MenuManager implements DataSubscriber
 		settingsMenu.add(makeMenuItem(new ChooseSingleParameter(_app, FunctionLibrary.FUNCTION_SET_ALTITUDE_TOLERANCE)));
 		// Set timezone
 		settingsMenu.add(makeMenuItem(FunctionLibrary.FUNCTION_SET_TIMEZONE));
+		// Set Earthdata authentication
+		settingsMenu.add(makeMenuItem(FunctionLibrary.FUNCTION_SET_EARTHDATA_AUTH));
 		settingsMenu.addSeparator();
 		// Save configuration
 		settingsMenu.add(makeMenuItem(FunctionLibrary.FUNCTION_SAVECONFIG));
@@ -892,7 +904,7 @@ public class MenuManager implements DataSubscriber
 		_getWeatherItem.setEnabled(hasData);
 		_findWaypointItem.setEnabled(hasData && _track.hasWaypoints());
 		// have we got a cache?
-		_downloadSrtmItem.setEnabled(hasData && Config.getConfigString(Config.KEY_DISK_CACHE) != null);
+		_downloadSrtmMenu.setEnabled(hasData && Config.getConfigString(Config.KEY_DISK_CACHE) != null);
 		// have we got any timestamps?
 		_deleteByDateItem.setEnabled(hasData && _track.hasData(Field.TIMESTAMP));
 

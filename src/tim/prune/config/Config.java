@@ -105,6 +105,8 @@ public abstract class Config
 	public static final String KEY_WAYPOINT_ICON_SIZE = "prune.waypointiconsize";
 	/** Id of selected timezone */
 	public static final String KEY_TIMEZONE_ID = "prune.timezoneid";
+	/** Username/password to the Earthdata server for SRTM 1-arcsecond tiles */
+	public static final String KEY_EARTHDATA_AUTH = "prune.earthdataauth";
 
 
 	/** Initialise the default properties */

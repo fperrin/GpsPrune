@@ -57,12 +57,12 @@ import tim.prune.function.settings.SaveConfig;
 import tim.prune.function.settings.SetAltitudeTolerance;
 import tim.prune.function.settings.SetColours;
 import tim.prune.function.settings.SetDisplaySettings;
+import tim.prune.function.settings.SetEarthdataAuthentication;
 import tim.prune.function.settings.SetLanguage;
 import tim.prune.function.settings.SetMapBgFunction;
 import tim.prune.function.settings.SetPathsFunction;
 import tim.prune.function.sew.SewTrackSegmentsFunction;
 import tim.prune.function.sew.SplitSegmentsFunction;
-import tim.prune.function.srtm.DownloadSrtmFunction;
 import tim.prune.function.srtm.LookupSrtmFunction;
 import tim.prune.function.weather.GetWeatherForecastFunction;
 import tim.prune.load.AudioLoader;
@@ -104,7 +104,6 @@ public abstract class FunctionLibrary
 	public static GenericFunction FUNCTION_DELETE_BY_DATE = null;
 	public static SingleNumericParameterFunction FUNCTION_INTERPOLATE = null;
 	public static GenericFunction FUNCTION_LOOKUP_SRTM = null;
-	public static GenericFunction FUNCTION_DOWNLOAD_SRTM = null;
 	public static GenericFunction FUNCTION_NEARBY_WIKIPEDIA = null;
 	public static GenericFunction FUNCTION_SEARCH_WIKIPEDIA = null;
 	public static GenericFunction FUNCTION_SEARCH_OSMPOIS = null;
@@ -148,6 +147,7 @@ public abstract class FunctionLibrary
 	public static GenericFunction FUNCTION_SET_COLOURS = null;
 	public static GenericFunction FUNCTION_SET_LANGUAGE = null;
 	public static SingleNumericParameterFunction FUNCTION_SET_ALTITUDE_TOLERANCE = null;
+	public static GenericFunction FUNCTION_SET_EARTHDATA_AUTH = null;
 	public static GenericFunction FUNCTION_SET_TIMEZONE = null;
 	public static GenericFunction FUNCTION_HELP   = null;
 	public static GenericFunction FUNCTION_SHOW_KEYS = null;
@@ -185,7 +185,6 @@ public abstract class FunctionLibrary
 		FUNCTION_DELETE_BY_DATE = new DeleteByDateFunction(inApp);
 		FUNCTION_INTERPOLATE = new InterpolateFunction(inApp);
 		FUNCTION_LOOKUP_SRTM = new LookupSrtmFunction(inApp);
-		FUNCTION_DOWNLOAD_SRTM = new DownloadSrtmFunction(inApp);
 		FUNCTION_NEARBY_WIKIPEDIA = new GetWikipediaFunction(inApp);
 		FUNCTION_SEARCH_WIKIPEDIA = new SearchWikipediaNames(inApp);
 		FUNCTION_SEARCH_OSMPOIS = new SearchOsmPoisFunction(inApp);
@@ -230,6 +229,7 @@ public abstract class FunctionLibrary
 		FUNCTION_SET_LANGUAGE = new SetLanguage(inApp);
 		FUNCTION_SET_ALTITUDE_TOLERANCE = new SetAltitudeTolerance(inApp);
 		FUNCTION_SET_TIMEZONE = new SelectTimezoneFunction(inApp);
+		FUNCTION_SET_EARTHDATA_AUTH = new SetEarthdataAuthentication(inApp);
 		FUNCTION_HELP   = new HelpScreen(inApp);
 		FUNCTION_SHOW_KEYS = new ShowKeysScreen(inApp);
 		FUNCTION_ABOUT  = new AboutScreen(inApp);

@@ -67,7 +67,20 @@ public class SrtmTile
 			+ (_longitude >= 0?"E":"W")
 			+ (Math.abs(_longitude) < 100?"0":"")
 			+ (Math.abs(_longitude) < 10?"0":"")
-			+ Math.abs(_longitude)
-			+ ".hgt.zip";
+			+ Math.abs(_longitude);
+	}
+
+	public SrtmSource findBestCachedSource()
+	{
+		SrtmSource[] sources = {new SrtmGl1Source(),
+					new Srtm3Source() };
+		for (int i = 0; i < sources.length; i++)
+		{
+			if (sources[i].isCached(this))
+			{
+				return sources[i];
+			}
+		}
+		return null;
 	}
 }
