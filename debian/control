@@ -1,0 +1,59 @@
+Source: gpsprune
+Maintainer: Debian GIS Project <pkg-grass-devel@lists.alioth.debian.org>
+Uploaders: David Paleino <dapal@debian.org>,
+           Mònica Ramírez Arceda <monica@debian.org>,
+           Bas Couwenberg <sebastic@debian.org>
+Section: utils
+Priority: optional
+Build-Depends: ant,
+               debhelper (>= 9),
+               javahelper,
+               default-jdk,
+               fastjar,
+               libjava3d-java,
+               libvecmath-java
+Standards-Version: 4.4.1
+Vcs-Browser: https://salsa.debian.org/debian-gis-team/gpsprune
+Vcs-Git: https://salsa.debian.org/debian-gis-team/gpsprune.git
+Homepage: https://activityworkshop.net/software/gpsprune/index.html
+
+Package: gpsprune
+Architecture: all
+Depends: ${java:Depends},
+         ${misc:Depends}
+Recommends: gnuplot-x11,
+            gpsbabel,
+            libimage-exiftool-perl,
+            libjava3d-jni,
+            libjava3d-java,
+            libvecmath-java
+Description: visualize, edit, convert and prune GPS data
+ GpsPrune is an application for viewing, editing and converting coordinate
+ data from GPS systems. It's a tool for preparing GPS data before you go on a
+ trip, and for playing with your collected GPS data after you get home again.
+ .
+ It can load data from arbitrary text-based formats (for example, any
+ tab-separated or comma-separated file) or XML, or directly from a GPS
+ receiver. It can display the data (as map view using OpenStreetMap
+ images and as altitude profile), edit this data (for example delete
+ points and ranges, sort waypoints, compress tracks), and save the data
+ (in various text-based formats). It can also export data as a GPX
+ file, or as KML/KMZ for import into Google Earth, or send it to a GPS
+ receiver.
+ .
+ Some example uses of GpsPrune include cleaning up tracks by deleting
+ wayward points - either recorded by error or by unintended detours. It
+ can also be used to compare and combine tracks, convert to and from
+ various formats, compress tracks, export data to Google Earth, or to
+ analyse data to calculate distances, altitudes and so on.
+ .
+ Furthermore, GpsPrune is able to display the tracks in 3d format and
+ lets you spin the model round to look at it from various directions.
+ You can also export the model in POV format so that you can render a
+ nice picture using Povray. You can also create charts of altitudes or
+ speeds. It can also load Jpegs and read their coordinates from the
+ EXIF tags, and export thumbnails of these photos to Kmz format so that
+ they appear as popups in Google Earth. If your photos don't have
+ coordinates yet, GpsPrune can be used to connect them (either manually or
+ automatically using the photo timestamps) to data points, and write
+ these coordinates into the EXIF tags.
