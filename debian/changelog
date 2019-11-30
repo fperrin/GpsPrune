@@ -1,9 +1,14 @@
-gpsprune (19.2-2) UNRELEASED; urgency=medium
+gpsprune (19.2-2) unstable; urgency=medium
 
+  [ Bas Couwenberg ]
   * Bump Standards-Version to 4.4.1, no changes.
   * Update gbp.conf to use --source-only-changes by default.
 
- -- Bas Couwenberg <sebastic@debian.org>  Tue, 25 Dec 2018 22:21:42 +0100
+  [ Frédéric Perrin ]
+  * Remove generation of srtmtiles.dat
+  * Remove generation of srtmtiles.dat
+
+ -- Frédéric Perrin <fred@loir.Home>  Sat, 30 Nov 2019 22:24:49 +0000
 
 gpsprune (19.2-1) unstable; urgency=medium
 

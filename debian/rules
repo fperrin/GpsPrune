@@ -2,20 +2,20 @@
 # -*- makefile -*-
 
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 export JAVA_HOME=/usr/lib/jvm/default-java
 export CLASSPATH=/usr/share/java/j3dcore.jar:/usr/share/java/j3dutils.jar:/usr/share/java/vecmath.jar
 
 export JH_JAR_EXTRA=$(shell find tim/prune/lang/ tim/prune/gui/images -type f) tim/prune/function/srtm/srtmtiles.dat
 
-srtmtiles:
-	javac tim/prune/function/srtm/gen/GenerateTileLookup.java
-	CLASSPATH=. java tim.prune.function.srtm.gen.GenerateTileLookup
-	mv $(CURDIR)/srtmtiles.dat tim/prune/function/srtm/
-	rm -rf tim/prune/function/srtm/gen/GenerateTileLookup.class
+#srtmtiles:
+#	javac tim/prune/function/srtm/gen/GenerateTileLookup.java
+#	CLASSPATH=. java tim.prune.function.srtm.gen.GenerateTileLookup
+#	mv $(CURDIR)/srtmtiles.dat tim/prune/function/srtm/
+#	rm -rf tim/prune/function/srtm/gen/GenerateTileLookup.class
 
-override_jh_build: srtmtiles
+override_jh_build: #srtmtiles
 	jh_build --no-javadoc
 
 override_jh_depends:
