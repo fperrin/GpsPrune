@@ -455,6 +455,22 @@ public class App
 
 
 	/**
+	 * Remove altitudes from selected points
+	 */
+	public void removeAltitudes(int selStart, int selEnd)
+	{
+		UndoRemoveAltitudes undo = new UndoRemoveAltitudes(_trackInfo, selStart, selEnd);
+		if (_trackInfo.getTrack().removeAltitudes(selStart, selEnd))
+		{
+			_undoStack.add(undo);
+			_trackInfo.getSelection().markInvalid();
+			UpdateMessageBroker.informSubscribers(DataSubscriber.DATA_EDITED);
+			UpdateMessageBroker.informSubscribers(I18nManager.getText("confirm.removealtitudes"));
+		}
+	}
+
+
+	/**
 	 * Merge the track segments within the current selection
 	 */
 	public void mergeTrackSegments()

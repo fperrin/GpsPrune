@@ -355,6 +355,16 @@ public class DataPoint
 	}
 
 	/**
+	 * Remove altitude from point
+	 */
+	public void removeAltitude()
+	{
+		_altitude = Altitude.NONE;
+		_fieldValues[_fieldList.getFieldIndex(Field.ALTITUDE)] = _altitude.getStringValue(null);
+		setModified(false);
+	}
+
+	/**
 	 * Reset the altitude to the previous value (by an undo)
 	 * @param inClone altitude object cloned from earlier
 	 */

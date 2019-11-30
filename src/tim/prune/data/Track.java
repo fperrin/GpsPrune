@@ -378,6 +378,31 @@ public class Track
 
 
 	/**
+	 * Remove altitudes from the specified range
+	 * @param inStart start of range
+	 * @param inEnd end of range
+	 */
+	public boolean removeAltitudes(int inStart, int inEnd)
+	{
+		// sanity check
+		if (inStart < 0 || inEnd < 0 || inStart >= inEnd || inEnd >= _numPoints) {
+			return false;
+		}
+
+		boolean anyRemoved = false;
+		for (int i=inStart; i<=inEnd; i++)
+		{
+			DataPoint p = _dataPoints[i];
+			if (p != null && p.hasAltitude())
+			{
+				p.removeAltitude();
+				anyRemoved = true;
+			}
+		}
+		return anyRemoved;
+	}
+
+	/**
 	 * Interleave all waypoints by each nearest track point
 	 * @return true if successful, false if no change
 	 */
