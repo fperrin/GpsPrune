@@ -228,8 +228,9 @@ public class SelectorDisplay extends GenericDisplay
 			else if (numFiles > 1)
 			{
 				final String labelText = I18nManager.getText("details.track.numfiles") + ": " + numFiles;
+				final String filenameString = String.join(", ", _trackInfo.getFileInfo().getFilenames());
 				_filenameLabel.setText(labelText);
-				_filenameLabel.setToolTipText(labelText);
+				_filenameLabel.setToolTipText(filenameString);
 			}
 			else
 			{

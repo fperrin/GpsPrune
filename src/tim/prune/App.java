@@ -51,6 +51,7 @@ public class App
 {
 	// Instance variables
 	private JFrame _frame = null;
+	private String _titlePrefix = null;
 	private Track _track = null;
 	private TrackInfo _trackInfo = null;
 	private int _lastSavePosition = 0;
@@ -79,6 +80,7 @@ public class App
 	public App(JFrame inFrame)
 	{
 		_frame = inFrame;
+		_titlePrefix = _frame.getTitle();
 		_undoStack = new UndoStack();
 		_track = new Track();
 		_trackInfo = new TrackInfo(_track);
@@ -777,6 +779,8 @@ public class App
 		_menuManager.informFileLoaded();
 		// recentre viewport on new file data
 		_viewport.recentreViewport();
+		// update main window title
+		updateTitle();
 		// Remove busy lock
 		_busyLoading = false;
 		// load next file if there's a queue
@@ -1018,5 +1022,17 @@ public class App
 	/** @param inMode the current app mode */
 	public void setCurrentMode(AppMode inMode) {
 		_appMode = inMode;
+	}
+
+	/** Update main window title **/
+	public void updateTitle() {
+		ArrayList<String> filenames = _trackInfo.getFileInfo().getFilenames();
+		if (filenames.size() > 0) {
+			_frame.setTitle(_titlePrefix + ": " + String.join(", ", filenames));
+		}
+		else
+		{
+			_frame.setTitle(_titlePrefix);
+		}
 	}
 }

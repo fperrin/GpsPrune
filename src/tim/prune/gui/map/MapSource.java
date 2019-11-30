@@ -104,7 +104,7 @@ public abstract class MapSource
 			urlstr = "http://" + urlstr;
 		}
 		// check trailing /
-		if (!urlstr.endsWith("/")) {
+		if (!urlstr.endsWith("/") && !urlstr.contains("?")) {
 			urlstr = urlstr + "/";
 		}
 		// Validate current url, return null if not ok
