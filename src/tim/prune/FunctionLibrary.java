@@ -56,6 +56,7 @@ import tim.prune.function.settings.SaveConfig;
 import tim.prune.function.settings.SetAltitudeTolerance;
 import tim.prune.function.settings.SetColours;
 import tim.prune.function.settings.SetDisplaySettings;
+import tim.prune.function.settings.SetEarthdataAuthentication;
 import tim.prune.function.settings.SetLanguage;
 import tim.prune.function.settings.SetMapBgFunction;
 import tim.prune.function.settings.SetPathsFunction;
@@ -144,6 +145,7 @@ public abstract class FunctionLibrary
 	public static GenericFunction FUNCTION_SET_COLOURS = null;
 	public static GenericFunction FUNCTION_SET_LANGUAGE = null;
 	public static SingleNumericParameterFunction FUNCTION_SET_ALTITUDE_TOLERANCE = null;
+	public static GenericFunction FUNCTION_SET_EARTHDATA_AUTH = null;
 	public static GenericFunction FUNCTION_SET_TIMEZONE = null;
 	public static GenericFunction FUNCTION_HELP   = null;
 	public static GenericFunction FUNCTION_SHOW_KEYS = null;
@@ -224,6 +226,7 @@ public abstract class FunctionLibrary
 		FUNCTION_SET_LANGUAGE = new SetLanguage(inApp);
 		FUNCTION_SET_ALTITUDE_TOLERANCE = new SetAltitudeTolerance(inApp);
 		FUNCTION_SET_TIMEZONE = new SelectTimezoneFunction(inApp);
+		FUNCTION_SET_EARTHDATA_AUTH = new SetEarthdataAuthentication(inApp);
 		FUNCTION_HELP   = new HelpScreen(inApp);
 		FUNCTION_SHOW_KEYS = new ShowKeysScreen(inApp);
 		FUNCTION_ABOUT  = new AboutScreen(inApp);

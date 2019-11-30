@@ -661,6 +661,8 @@ public class MenuManager implements DataSubscriber
 		settingsMenu.add(makeMenuItem(new ChooseSingleParameter(_app, FunctionLibrary.FUNCTION_SET_ALTITUDE_TOLERANCE)));
 		// Set timezone
 		settingsMenu.add(makeMenuItem(FunctionLibrary.FUNCTION_SET_TIMEZONE));
+		// Set Earthdata authentication
+		settingsMenu.add(makeMenuItem(FunctionLibrary.FUNCTION_SET_EARTHDATA_AUTH));
 		settingsMenu.addSeparator();
 		// Save configuration
 		settingsMenu.add(makeMenuItem(FunctionLibrary.FUNCTION_SAVECONFIG));
