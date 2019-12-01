@@ -208,8 +208,11 @@ public class PointNameEditor extends GenericFunction
 		{
 			// If a new name has been added, changing the point
 			// from trackpoint to waypoint, duplicate it
-			_app.createPoint(_point.clonePoint());
-			
+			if (wasNameAdded())
+			{
+				_app.createPoint(_point.clonePoint());
+			}
+
 			// make lists for edit and undo, and add the changed field
 			FieldEditList editList = new FieldEditList();
 			FieldEditList undoList = new FieldEditList();
