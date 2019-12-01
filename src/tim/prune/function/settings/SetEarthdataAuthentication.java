@@ -143,25 +143,25 @@ public class SetEarthdataAuthentication extends GenericFunction
 
 	private void prefillCurrentAuth()
 	{
-		String authString = Config.getConfigString(Config.KEY_EARTHDATA_AUTH);
-		if (authString == null)
-		{
-			_usernameField.setText("");
-			_passwordField.setText("");
-		}
-		String decoded = new String(Base64.getDecoder().decode(authString));
-		if (decoded.contains(":"))
-		{
-			_usernameField.setText(decoded.split(":", 2)[0]);
-			_passwordField.setText(decoded.split(":", 2)[1]);
-		}
-		else
-		{
-			_usernameField.setText("");
-			_passwordField.setText("");
-		}
-
+		_usernameField.setText("");
+		_passwordField.setText("");
 		_authAccepted.setText(" ");
+
+		String authString = Config.getConfigString(Config.KEY_EARTHDATA_AUTH);
+		try
+		{
+			String decoded = new String(Base64.getDecoder().decode(authString));
+			if (decoded.contains(":"))
+			{
+				_usernameField.setText(decoded.split(":", 2)[0]);
+				_passwordField.setText(decoded.split(":", 2)[1]);
+			}
+		}
+		catch (Exception e)
+		{
+			// empty settings, or invalid base64 data --leave blank
+			return;
+		}
 	}
 
 	private void testUsernameAndPassword()
