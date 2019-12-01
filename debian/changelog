@@ -1,3 +1,30 @@
+gpsprune (19.2.fp1-local1) unstable; urgency=medium
+
+  [ activityworkshop ]
+  * Moved source into separate src directory due to popular request
+  * Add existing build tools (sh, ant) before modification to new structure
+  * pom.xml for Maven contributed by Plamen Tanov (ptanov)
+  * Update build scripts
+
+  [ Frédéric Perrin ]
+  * Make it easier to grasp the handle for adding points
+  * Never overzoom when initially opening a track
+  * Default to world map with drawing enabled
+  * Allow to use maps with custom format
+  * Set main window title
+  * Use SRTM 1deg data from NASA servers
+  * Add a settings entry to configure Earthdata account
+  * Show minutes for durations > 1 day
+  * Abort build on error
+  * Ignore .class files
+  * Duplicate point before converting it to waypoint
+  * Add menu item to remove altitudes from track
+  * [debian] Fix build paths for dev version of GpsPrune
+  * [debian] GTK look & feel
+  * [debian] Include paths in resource files
+
+ -- Frédéric Perrin <fred@loir.Home>  Sun, 01 Dec 2019 01:06:39 +0000
+
 gpsprune (19.2-2) unstable; urgency=medium
 
   [ Bas Couwenberg ]
