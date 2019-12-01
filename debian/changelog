@@ -1,3 +1,9 @@
+gpsprune (19.2.fp2-local1) unstable; urgency=medium
+
+  * Duplicate point before converting it to waypoint
+
+ -- Frédéric Perrin <fred@loir.Home>  Sun, 01 Dec 2019 12:42:30 +0000
+
 gpsprune (19.2.fp1-local1) unstable; urgency=medium
 
   [ activityworkshop ]
