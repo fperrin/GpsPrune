@@ -272,8 +272,6 @@ public class GpsPrune
 		frame.setVisible(true);
 		// Set position of map/profile splitter
 		midSplit.setDividerLocation(0.75);
-		// Update menu (only needed for recent file list)
-		UpdateMessageBroker.informSubscribers();
 
 		// Make a full screen toggler
 		SidebarController fsc = new SidebarController(new Component[] {leftPanel, profileDisp, rightPanel},
