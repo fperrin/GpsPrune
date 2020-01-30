@@ -70,6 +70,7 @@
 					<include>tim/prune/gui/images/*</include>
 					<include>tim/prune/lang/*</include>
 					<include>tim/prune/function/srtm/srtmtiles.dat</include>
+					<include>tim/prune/function/srtm/viewfinder/tiles.dat</include>
 					<include>tim/prune/*.txt</include>
 				</includes>
 			</resource>
