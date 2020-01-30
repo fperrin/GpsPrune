@@ -793,6 +793,24 @@ public class Track
 		}
 	}
 
+	/**
+	 * Collect all segment starts into the given list
+	 * @param inList List to fill with waypoints
+	 */
+	public void getSegmentStarts(List<DataPoint> inList)
+	{
+		// clear list
+		inList.clear();
+		// loop over points and copy all segment starts into list
+		for (int i=0; i<=_numPoints-1; i++)
+		{
+			if (_dataPoints[i] != null && _dataPoints[i].getSegmentStart())
+			{
+				inList.add(_dataPoints[i]);
+			}
+		}
+	}
+
 
 	/**
 	 * Search for the given Point in the track and return the index

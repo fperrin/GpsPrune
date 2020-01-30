@@ -53,6 +53,10 @@ public class SelectorDisplay extends GenericDisplay
 	private JPanel _audioListPanel = null;
 	private JList<String> _audioList = null;
 	private MediaListModel _audioListModel = null;
+	// Segments
+	private JPanel _segmentListPanel = null;
+	private JList<String> _segmentList = null;
+	private SegmentListModel _segmentListModel = null;
 
 	// scrollbar interval
 	private static final int SCROLLBAR_INTERVAL = 50;
@@ -144,6 +148,18 @@ public class SelectorDisplay extends GenericDisplay
 		// don't add audio list either
 		_listsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+		// Segment list
+		_segmentListModel = new SegmentListModel(_trackInfo.getTrack());
+		_segmentList = new JList<String>(_segmentListModel);
+		_segmentList.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e)
+			{
+				if (!e.getValueIsAdjusting()) {
+					selectSegment(_segmentList.getSelectedIndex());
+				}
+			}});
+		_segmentListPanel = makeListPanel("details.lists.segments", _segmentList);
+
 		// add the controls to the main panel
 		mainPanel.add(trackDetailsPanel);
 		mainPanel.add(Box.createVerticalStrut(5));
@@ -187,6 +203,18 @@ public class SelectorDisplay extends GenericDisplay
 	private void selectAudio(int inIndex)
 	{
 		_trackInfo.selectAudio(inIndex);
+	}
+
+	/**
+	 *
+	 */
+	private void selectSegment(int inIndex)
+	{
+		if (inIndex >= 0) {
+			int start = _segmentListModel.getSegmentStart(inIndex);
+			int end = _segmentListModel.getSegmentEnd(inIndex);
+			_trackInfo.getSelection().selectRange(start, end);
+		}
 	}
 
 	/**
@@ -257,7 +285,7 @@ public class SelectorDisplay extends GenericDisplay
 		_ignoreScrollEvents = false;
 
 		// update waypoints and photos if necessary
-		if ((inUpdateType |
+		if ((inUpdateType &
 			(DataSubscriber.DATA_ADDED_OR_REMOVED | DataSubscriber.DATA_EDITED | DataSubscriber.WAYPOINTS_MODIFIED)) > 0)
 		{
 			_waypointListModel.fireChanged();
@@ -277,6 +305,28 @@ public class SelectorDisplay extends GenericDisplay
 			{
 				// point is selected in list but different from current point - deselect
 				_waypointList.clearSelection();
+			}
+		}
+		if ((inUpdateType & (DataSubscriber.DATA_ADDED_OR_REMOVED | DataSubscriber.DATA_EDITED)) > 0)
+		{
+			_segmentListModel.fireChanged();
+			if (_segmentListModel.getSize() > 1)
+			{
+				_listsPanel.add(_segmentListPanel);
+			}
+		}
+		// Deselect segment if selection goes beyond the selected
+		// segment
+		if ((inUpdateType & DataSubscriber.SELECTION_CHANGED) > 0)
+		{
+			int segmentSelected = _segmentList.getSelectedIndex();
+			if (segmentSelected >= 0)
+			{
+				if (_trackInfo.getSelection().getStart() != _segmentListModel.getSegmentStart(segmentSelected) ||
+				    _trackInfo.getSelection().getEnd() != _segmentListModel.getSegmentEnd(segmentSelected))
+				{
+					_segmentList.clearSelection();
+				}
 			}
 		}
 		// Hide photo list if no photos loaded, same for audio
@@ -347,6 +397,7 @@ public class SelectorDisplay extends GenericDisplay
 		_listsPanel.removeAll();
 		_listsPanel.setLayout(new GridLayout(0, 1));
 		_listsPanel.add(_waypointListPanel);
+		_listsPanel.add(_segmentListPanel);
 		if (inShowPhotos) {
 			_listsPanel.add(_photoListPanel);
 		}
