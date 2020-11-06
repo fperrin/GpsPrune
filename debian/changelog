@@ -1,3 +1,23 @@
+gpsprune (20.1.fp1) bionic; urgency=medium
+
+  * Fix NPE in SetEarthdataAuthentication with no credentials set
+  * Allow to specify a time offset in blocks of 1024-week
+  * Don't informSubscriber() after launching files
+  * Use data from viewfinderpanoramas.org
+  * Read ZIP entries in chunks
+  * Download tiles in chunks
+  * Refactor and add comments
+  * Add necessary resources to pom.xml
+  * Add a panel to select by segment
+  * Always set point altitudes in LookupSRTM
+  * [debian] Fix build paths for dev version of GpsPrune
+  * [debian] GTK look & feel
+  * [debian] Include paths in resource files
+  * [debian] Run ./debian/rules clean before build
+  * [debian] Add extra datafile to package
+
+ -- Frédéric Perrin <fred@renard>  Fri, 06 Nov 2020 20:18:14 +0000
+
 gpsprune (19.2-2) unstable; urgency=medium
 
   [ Bas Couwenberg ]
