@@ -1,3 +1,11 @@
+gpsprune (20.1.fp2) bionic; urgency=medium
+
+  * Fix times with holes
+  * Fix times with holes and misordered segments
+  * Add unit-tests
+
+ -- Frédéric Perrin <fred@renard>  Sun, 07 Mar 2021 19:52:57 +0000
+
 gpsprune (20.1.fp1) bionic; urgency=medium
 
   * Fix NPE in SetEarthdataAuthentication with no credentials set
