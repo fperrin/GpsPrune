@@ -1,3 +1,9 @@
+gpsprune (20.3.fp1) focal; urgency=medium
+
+  * [debian] Move to GpsPrune 20.3
+
+ -- Frédéric Perrin <fred@renard>  Sat, 10 Apr 2021 21:18:38 +0100
+
 gpsprune (20.1.fp2) bionic; urgency=medium
 
   * Fix times with holes
