@@ -1,3 +1,9 @@
+gpsprune (20.3.fp2) focal; urgency=medium
+
+  * LookupSrtmFunction: always set point altitude
+
+ -- Frédéric Perrin <fred@renard>  Sat, 10 Apr 2021 22:09:35 +0100
+
 gpsprune (20.3.fp1) focal; urgency=medium
 
   * [debian] Move to GpsPrune 20.3
