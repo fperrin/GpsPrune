@@ -325,9 +325,6 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 		for (int p = 0; p < _track.getNumPoints(); p++)
 		{
 			DataPoint point = _track.getPoint(p);
-			if (!point.hasAltitude()
-				|| (inOverwriteZeros && point.getAltitude().getValue() == 0))
-			{
 				if (new SrtmTile(point).equals(inTile))
 				{
 					double x = (point.getLongitude().getDouble() - inTile.getLongitude()) * 1200;
@@ -364,7 +361,6 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 						// System.err.println("lat=" + point.getLatitude().getDouble() + ", x=" + x + ", y=" + y + ", idx=" + idx1);
 					}
 				}
-			}
 		}
 		return numAltitudesFound;
 	}
