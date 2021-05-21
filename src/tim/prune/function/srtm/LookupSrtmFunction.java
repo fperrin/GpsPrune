@@ -102,43 +102,13 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 	 */
 	public void run()
 	{
-		boolean hasZeroAltitudePoints = false;
-		boolean hasNonZeroAltitudePoints = false;
-		// First, loop to see what kind of points we have
-		for (int i = 0; i < _track.getNumPoints(); i++)
-		{
-			if (_track.getPoint(i).hasAltitude())
-			{
-				if (_track.getPoint(i).getAltitude().getValue() == 0) {
-					hasZeroAltitudePoints = true;
-				}
-				else {
-					hasNonZeroAltitudePoints = true;
-				}
-			}
-		}
-		// Should we overwrite the zero altitude values?
-		boolean overwriteZeros = hasZeroAltitudePoints && !hasNonZeroAltitudePoints;
-		// If non-zero values present as well, ask user whether to overwrite the zeros or not
-		if (hasNonZeroAltitudePoints && hasZeroAltitudePoints && JOptionPane.showConfirmDialog(_parentFrame,
-			I18nManager.getText("dialog.lookupsrtm.overwritezeros"), I18nManager.getText(getNameKey()),
-			JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
-		{
-			overwriteZeros = true;
-		}
-
 		// Now loop again to extract the required tiles
 		HashSet<SrtmTile> tileSet = new HashSet<SrtmTile>();
 		for (int i = 0; i < _track.getNumPoints(); i++)
 		{
-			// Consider points which don't have altitudes or have zero values
-			if (!_track.getPoint(i).hasAltitude()
-				|| (overwriteZeros && _track.getPoint(i).getAltitude().getValue() == 0))
-			{
-				tileSet.add(new SrtmTile(_track.getPoint(i)));
-			}
+			tileSet.add(new SrtmTile(_track.getPoint(i)));
 		}
-		lookupValues(tileSet, overwriteZeros);
+		lookupValues(tileSet);
 		// Finished
 		_running = false;
 		// Show tip if lots of online lookups were necessary
@@ -154,9 +124,8 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 	/**
 	 * Lookup the values from SRTM data
 	 * @param inTileSet set of tiles to get
-	 * @param inOverwriteZeros true to overwrite zero altitude values
 	 */
-	private void lookupValues(HashSet<SrtmTile> inTileSet, boolean inOverwriteZeros)
+	private void lookupValues(HashSet<SrtmTile> inTileSet)
 	{
 		UndoLookupSrtm undo = new UndoLookupSrtm(_app.getTrackInfo());
 		int numAltitudesFound = 0;
@@ -208,7 +177,7 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 
 					if (entryOk)
 					{
-						numAltitudesFound += applySrtmTileToWholeTrack(tile, heights, inOverwriteZeros);
+						numAltitudesFound += applySrtmTileToWholeTrack(tile, heights);
 					}
 				}
 				catch (IOException ioe) {
@@ -315,52 +284,51 @@ public class LookupSrtmFunction extends GenericFunction implements Runnable
 	 * in the track with missing altitude
 	 * @param inTile tile being applied
 	 * @param inHeights height data read in from file
-	 * @param inOverwriteZeros true to overwrite zero altitude values
 	 * @return number of altitudes found
 	 */
-	private int applySrtmTileToWholeTrack(SrtmTile inTile, int[] inHeights, boolean inOverwriteZeros)
+	private int applySrtmTileToWholeTrack(SrtmTile inTile, int[] inHeights)
 	{
 		int numAltitudesFound = 0;
 		// Loop over all points in track, try to apply altitude from array
 		for (int p = 0; p < _track.getNumPoints(); p++)
 		{
 			DataPoint point = _track.getPoint(p);
-				if (new SrtmTile(point).equals(inTile))
+			if (new SrtmTile(point).equals(inTile))
+			{
+				double x = (point.getLongitude().getDouble() - inTile.getLongitude()) * 1200;
+				double y = 1201 - (point.getLatitude().getDouble() - inTile.getLatitude()) * 1200;
+				int idx1 = ((int)y)*1201 + (int)x;
+				try
 				{
-					double x = (point.getLongitude().getDouble() - inTile.getLongitude()) * 1200;
-					double y = 1201 - (point.getLatitude().getDouble() - inTile.getLatitude()) * 1200;
-					int idx1 = ((int)y)*1201 + (int)x;
-					try
+					int[] fouralts = {inHeights[idx1], inHeights[idx1+1], inHeights[idx1-1201], inHeights[idx1-1200]};
+					int numVoids = (fouralts[0]==VOID_VAL?1:0) + (fouralts[1]==VOID_VAL?1:0)
+						+ (fouralts[2]==VOID_VAL?1:0) + (fouralts[3]==VOID_VAL?1:0);
+					// if (numVoids > 0) System.out.println(numVoids + " voids found");
+					double altitude = 0.0;
+					switch (numVoids)
 					{
-						int[] fouralts = {inHeights[idx1], inHeights[idx1+1], inHeights[idx1-1201], inHeights[idx1-1200]};
-						int numVoids = (fouralts[0]==VOID_VAL?1:0) + (fouralts[1]==VOID_VAL?1:0)
-							+ (fouralts[2]==VOID_VAL?1:0) + (fouralts[3]==VOID_VAL?1:0);
-						// if (numVoids > 0) System.out.println(numVoids + " voids found");
-						double altitude = 0.0;
-						switch (numVoids)
-						{
-							case 0:	altitude = bilinearInterpolate(fouralts, x, y); break;
-							case 1: altitude = bilinearInterpolate(fixVoid(fouralts), x, y); break;
-							case 2:
-							case 3: altitude = averageNonVoid(fouralts); break;
-							default: altitude = VOID_VAL;
-						}
-						// Special case for terrain tracks, don't interpolate voids yet
-						if (!_normalTrack && numVoids > 0) {
-							altitude = VOID_VAL;
-						}
-						if (altitude != VOID_VAL)
-						{
-							point.setFieldValue(Field.ALTITUDE, ""+altitude, false);
-							// depending on settings, this value may have been added as feet, we need to force metres
-							point.getAltitude().reset(new Altitude((int)altitude, UnitSetLibrary.UNITS_METRES));
-							numAltitudesFound++;
-						}
+					case 0:	altitude = bilinearInterpolate(fouralts, x, y); break;
+					case 1: altitude = bilinearInterpolate(fixVoid(fouralts), x, y); break;
+					case 2:
+					case 3: altitude = averageNonVoid(fouralts); break;
+					default: altitude = VOID_VAL;
 					}
-					catch (ArrayIndexOutOfBoundsException obe) {
-						// System.err.println("lat=" + point.getLatitude().getDouble() + ", x=" + x + ", y=" + y + ", idx=" + idx1);
+					// Special case for terrain tracks, don't interpolate voids yet
+					if (!_normalTrack && numVoids > 0) {
+						altitude = VOID_VAL;
+					}
+					if (altitude != VOID_VAL)
+					{
+						point.setFieldValue(Field.ALTITUDE, ""+altitude, false);
+						// depending on settings, this value may have been added as feet, we need to force metres
+						point.getAltitude().reset(new Altitude((int)altitude, UnitSetLibrary.UNITS_METRES));
+						numAltitudesFound++;
 					}
 				}
+				catch (ArrayIndexOutOfBoundsException obe) {
+					// System.err.println("lat=" + point.getLatitude().getDouble() + ", x=" + x + ", y=" + y + ", idx=" + idx1);
+				}
+			}
 		}
 		return numAltitudesFound;
 	}
